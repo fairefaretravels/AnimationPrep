@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Animation Prep — Production Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f14;
+    --surface: #161820;
+    --surface2: #1e2030;
+    --border: #2a2d3e;
+    --accent-purple: #7c6af7;
+    --accent-teal: #2a9d8f;
+    --accent-rust: #c1521a;
+    --accent-gold: #e8a020;
+    --accent-blue: #2563a8;
+    --accent-green: #2d6a4f;
+    --text-primary: #f0f0f5;
+    --text-muted: #8889a0;
+    --text-dim: #55566a;
+    --check-on: #5af0b0;
+    --check-off: #55566a;
+    --tag-bg: #252740;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    padding: 32px 40px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .logo-badge {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-teal));
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700; font-size: 18px; color: #fff;
+    flex-shrink: 0;
+  }
+  header h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px; font-weight: 700; letter-spacing: -0.3px;
+  }
+  header p { color: var(--text-muted); font-size: 13px; }
+
+  /* ─── PHASE PIPELINE ─── */
+  .pipeline {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .pipe-step {
+    padding: 16px 18px;
+    border-right: 1px solid var(--border);
+    position: relative;
+    cursor: default;
+  }
+  .pipe-step:last-child { border-right: none; }
+  .pipe-step .step-num {
+    font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
+    color: var(--text-dim); text-transform: uppercase; margin-bottom: 6px;
+  }
+  .pipe-step h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px; font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .pipe-step p {
+    font-size: 11px; color: var(--text-muted); line-height: 1.5;
+  }
+  .pipe-step .bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .step-1 .bar { background: var(--accent-purple); }
+  .step-2 .bar { background: var(--accent-teal); }
+  .step-3 .bar { background: var(--accent-rust); }
+  .step-4 .bar { background: var(--accent-gold); }
+  .step-5 .bar { background: var(--accent-blue); }
+  .step-6 .bar { background: var(--accent-green); }
+  .step-7 .bar { background: #888; }
+
+  /* ─── MAIN LAYOUT ─── */
+  main { padding: 32px 40px; }
+
+  .section-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+
+  /* ─── PHASE TABS ─── */
+  .phase-tabs {
+    display: flex; gap: 8px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .phase-tab {
+    padding: 8px 20px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .phase-tab:hover { border-color: var(--accent-purple); color: var(--accent-purple); }
+  .phase-tab.active {
+    background: var(--accent-purple);
+    border-color: var(--accent-purple);
+    color: #fff;
+  }
+  .phase-tab[data-phase="2"].active { background: var(--accent-teal); border-color: var(--accent-teal); }
+  .phase-tab[data-phase="3"].active { background: var(--accent-gold); border-color: var(--accent-gold); }
+  .phase-tab[data-phase="4"].active { background: var(--accent-rust); border-color: var(--accent-rust); }
+
+  /* ─── PHASE PANELS ─── */
+  .phase-panel { display: none; }
+  .phase-panel.active { display: block; }
+
+  /* ─── PHASE 1: CHARACTER TRACKER ─── */
+  .char-grid {
+    display: grid;
+    grid-template-columns: 220px 1fr 1fr;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .char-list {
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .char-list-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px; font-weight: 600;
+    color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase;
+  }
+  .char-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .char-item:hover { background: var(--surface2); }
+  .char-item.active { background: var(--surface2); border-left: 3px solid var(--accent-purple); }
+  .char-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+  }
+  .char-item-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px; font-weight: 600;
+  }
+  .char-item-type {
+    font-size: 11px; color: var(--text-muted);
+  }
+
+  .char-detail-col {
+    padding: 20px;
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+    min-height: 460px;
+  }
+  .char-prompt-col {
+    padding: 20px;
+    background: var(--surface);
+    min-height: 460px;
+  }
+
+  .col-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--text-dim);
+    margin-bottom: 14px;
+  }
+
+  .char-name-big {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px; font-weight: 700; margin-bottom: 4px;
+  }
+  .char-role-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 100px;
+    background: var(--tag-bg);
+    font-size: 11px; color: var(--accent-purple);
+    font-weight: 600; margin-bottom: 14px;
+  }
+
+  .trait-list { margin-bottom: 14px; }
+  .trait-item {
+    display: flex; align-items: flex-start; gap: 8px;
+    margin-bottom: 6px; font-size: 13px; color: var(--text-primary);
+  }
+  .trait-bullet {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent-purple); margin-top: 6px; flex-shrink: 0;
+  }
+
+  .relation-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+  .relation-tag {
+    padding: 3px 10px; border-radius: 100px;
+    background: var(--tag-bg); border: 1px solid var(--border);
+    font-size: 11px; color: var(--text-muted);
+  }
+
+  .scene-checks { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  .scene-check {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; cursor: pointer; user-select: none;
+  }
+  .scene-check input { display: none; }
+  .scene-check-box {
+    width: 18px; height: 18px; border-radius: 5px;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    font-size: 11px;
+  }
+  .scene-check input:checked + .scene-check-box {
+    background: var(--check-on);
+    border-color: var(--check-on);
+    color: #0e0f14;
+  }
+  .scene-check-label { color: var(--text-muted); }
+
+  .char-changes {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    font-size: 12px; color: var(--text-muted);
+  }
+  .char-changes strong { color: var(--text-primary); display: block; margin-bottom: 4px; }
+
+  /* Prompt + Result */
+  .prompt-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    font-size: 12px;
+    color: var(--text-primary);
+    line-height: 1.7;
+    margin-bottom: 14px;
+    min-height: 100px;
+    resize: vertical;
+    font-family: 'Inter', monospace;
+    width: 100%;
+  }
+  .prompt-box:focus { outline: none; border-color: var(--accent-purple); }
+
+  .result-drop {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-sm);
+    min-height: 120px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 8px;
+    color: var(--text-dim); font-size: 12px;
+    cursor: pointer; transition: border-color 0.15s;
+    position: relative; overflow: hidden;
+  }
+  .result-drop:hover { border-color: var(--accent-purple); }
+  .result-drop img {
+    width: 100%; height: 100%; object-fit: contain;
+    position: absolute; inset: 0;
+    border-radius: var(--radius-sm);
+  }
+  .result-drop input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer;
+  }
+  .result-drop-icon { font-size: 22px; }
+
+  .mini-btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--tag-bg);
+    color: var(--text-primary);
+    font-size: 12px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .mini-btn:hover { border-color: var(--accent-purple); color: var(--accent-purple); }
+  .mini-btn.primary {
+    background: var(--accent-purple); border-color: var(--accent-purple); color: #fff;
+  }
+  .mini-btn.primary:hover { opacity: 0.85; }
+
+  /* ─── PHASE 2: SCENE CARDS ─── */
+  .scene-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .scene-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .scene-card:hover { transform: translateY(-2px); border-color: var(--accent-teal); }
+  .scene-card-header {
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .scene-num {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--accent-teal);
+  }
+  .scene-char-count {
+    font-size: 11px; color: var(--text-dim);
+  }
+  .scene-card-title {
+    padding: 10px 16px 6px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px; font-weight: 600;
+  }
+  .scene-card-desc {
+    padding: 0 16px 14px;
+    font-size: 12px; color: var(--text-muted); line-height: 1.5;
+  }
+  .scene-char-pills {
+    padding: 0 16px 14px;
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .scene-char-pill {
+    padding: 2px 8px; border-radius: 100px;
+    background: var(--tag-bg); border: 1px solid var(--border);
+    font-size: 11px; color: var(--text-muted);
+  }
+  .scene-thumb-row {
+    padding: 0 16px 14px;
+    display: flex; gap: 6px;
+  }
+  .scene-thumb {
+    width: 48px; height: 48px;
+    border-radius: 6px;
+    background: var(--surface2);
+    border: 1px dashed var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    position: relative; overflow: hidden; cursor: pointer;
+  }
+  .scene-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .scene-thumb input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+  /* Scene Modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7); z-index: 100;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 680px; max-width: 95vw; max-height: 85vh;
+    overflow-y: auto; padding: 28px;
+    position: relative;
+  }
+  .modal-close {
+    position: absolute; top: 16px; right: 20px;
+    background: none; border: none;
+    color: var(--text-muted); font-size: 20px; cursor: pointer;
+    line-height: 1;
+  }
+  .modal-close:hover { color: var(--text-primary); }
+  .modal-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px; font-weight: 700; margin-bottom: 4px;
+  }
+  .modal-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+  .modal-pics-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    margin-bottom: 20px;
+  }
+  .modal-pic-slot {
+    aspect-ratio: 1;
+    background: var(--surface2);
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 6px; font-size: 11px; color: var(--text-dim);
+    cursor: pointer; position: relative; overflow: hidden;
+    transition: border-color 0.15s;
+  }
+  .modal-pic-slot:hover { border-color: var(--accent-teal); }
+  .modal-pic-slot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+  .modal-pic-slot input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .modal-pic-slot .pic-icon { font-size: 24px; }
+  .modal-section-label { 
+    font-size: 11px; font-weight: 600; letter-spacing: 1.5px; 
+    text-transform: uppercase; color: var(--text-dim); 
+    margin: 16px 0 10px;
+  }
+
+  /* ─── PHASE 3: ANIMATE ─── */
+  .animate-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+  }
+  .clip-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .clip-preview {
+    background: var(--surface2);
+    height: 110px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .clip-duration {
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(0,0,0,0.6);
+    border-radius: 4px; padding: 2px 6px;
+    font-size: 11px; font-weight: 600; color: #fff;
+  }
+  .clip-status {
+    position: absolute; bottom: 8px; left: 8px;
+    border-radius: 4px; padding: 2px 8px;
+    font-size: 10px; font-weight: 600;
+  }
+  .clip-status.todo { background: #2a2d3e; color: var(--text-muted); }
+  .clip-status.wip { background: #3a2900; color: var(--accent-gold); }
+  .clip-status.done { background: #0f2a1a; color: var(--check-on); }
+  .clip-body { padding: 12px; }
+  .clip-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px; font-weight: 600; margin-bottom: 4px;
+  }
+  .clip-desc { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; }
+  .clip-actions { display: flex; gap: 6px; }
+
+  /* ─── PHASE 4: ASSEMBLY ─── */
+  .assembly-timeline {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .timeline-row {
+    display: grid;
+    grid-template-columns: 100px 1fr 120px;
+    align-items: center; gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    transition: border-color 0.15s;
+  }
+  .timeline-row:hover { border-color: var(--accent-rust); }
+  .timeline-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px; font-weight: 700; color: var(--accent-rust);
+  }
+  .timeline-desc { font-size: 13px; color: var(--text-primary); }
+  .timeline-tools {
+    font-size: 11px; color: var(--text-muted); text-align: right;
+  }
+  .timeline-progress {
+    margin-top: 4px;
+    height: 4px; border-radius: 2px; background: var(--surface2);
+    overflow: hidden;
+  }
+  .timeline-progress-fill {
+    height: 100%; border-radius: 2px; background: var(--accent-rust);
+    transition: width 0.3s;
+  }
+  .assemble-status {
+    display: flex; align-items: center; gap: 6px;
+    justify-content: flex-end;
+  }
+  .status-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+  }
+  .status-dot.todo { background: var(--text-dim); }
+  .status-dot.wip { background: var(--accent-gold); }
+  .status-dot.done { background: var(--check-on); }
+
+  /* ─── ADD CHAR BTN ─── */
+  .add-char-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 16px;
+    background: transparent;
+    border: none; border-top: 1px solid var(--border);
+    color: var(--text-dim); font-size: 13px;
+    cursor: pointer; width: 100%;
+    transition: color 0.15s;
+    font-family: 'Inter', sans-serif;
+  }
+  .add-char-btn:hover { color: var(--accent-purple); }
+
+  /* ─── DIVIDER ─── */
+  .spacer { height: 24px; }
+
+  textarea { font-family: 'Inter', sans-serif; }
+  
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ─── DEMO TAB ─── */
+  .demo-tab { border-color: #7c6af755 !important; }
+  .demo-tab:hover { border-color: var(--accent-gold) !important; color: var(--accent-gold) !important; }
+  .phase-tab[data-phase="demo"].active { background: linear-gradient(135deg,#7c6af7,#e8a020); border-color: transparent; }
+  .phase-tab[data-phase="notes"].active { background: var(--accent-green); border-color: var(--accent-green); }
+
+  /* ─── NOTES ─── */
+  .note-filter-btn {
+    padding: 5px 14px; border-radius: 100px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--text-muted); font-size: 12px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s; font-family: 'Space Grotesk', sans-serif;
+  }
+  .note-filter-btn:hover { border-color: var(--accent-green); color: var(--accent-green); }
+  .note-filter-btn.active { background: var(--accent-green); border-color: var(--accent-green); color: #fff; }
+
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+  }
+  .note-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    position: relative;
+    transition: border-color 0.15s;
+  }
+  .note-card:hover { border-color: var(--accent-green); }
+  .note-card-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .note-cat-pill {
+    padding: 2px 10px; border-radius: 100px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .cat-idea { background: #2a2a1a; color: var(--accent-gold); }
+  .cat-feedback { background: #1a2530; color: var(--accent-blue); }
+  .cat-todo { background: #1a2a1a; color: var(--check-on); }
+  .cat-asset { background: #2a1a2a; color: var(--accent-purple); }
+  .cat-music { background: #2a1a1a; color: var(--accent-rust); }
+
+  .note-delete {
+    background: none; border: none; color: var(--text-dim);
+    cursor: pointer; font-size: 14px; line-height: 1;
+    padding: 2px; border-radius: 4px;
+    transition: color 0.15s;
+  }
+  .note-delete:hover { color: #e05; }
+  .note-text {
+    font-size: 13px; color: var(--text-primary); line-height: 1.6;
+    white-space: pre-wrap; word-break: break-word;
+    margin-bottom: 10px;
+  }
+  .note-meta {
+    font-size: 11px; color: var(--text-dim);
+  }
+  .note-phase-tag {
+    display: inline-block; padding: 1px 8px; border-radius: 100px;
+    background: var(--tag-bg); font-size: 10px; color: var(--text-dim);
+    margin-left: 6px;
+  }
+
+  /* Note Editor Modal */
+  .note-editor-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7); z-index: 200;
+    align-items: center; justify-content: center;
+  }
+  .note-editor-overlay.open { display: flex; }
+  .note-editor {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 480px; max-width: 95vw;
+    padding: 28px; position: relative;
+  }
+  .note-editor h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px; font-weight: 700; margin-bottom: 16px;
+  }
+  .note-editor-close {
+    position: absolute; top: 16px; right: 20px;
+    background: none; border: none; color: var(--text-muted);
+    font-size: 20px; cursor: pointer;
+  }
+  .note-editor textarea {
+    width: 100%; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    color: var(--text-primary); padding: 12px; font-size: 14px;
+    line-height: 1.6; resize: vertical; min-height: 120px;
+    margin-bottom: 14px;
+  }
+  .note-editor textarea:focus { outline: none; border-color: var(--accent-green); }
+  .note-editor-fields {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    margin-bottom: 16px;
+  }
+  .note-editor select {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text-primary);
+    padding: 8px 10px; font-size: 13px; font-family: 'Inter', sans-serif;
+    width: 100%;
+  }
+  .note-editor select:focus { outline: none; border-color: var(--accent-green); }
+  .note-editor label {
+    display: block; font-size: 11px; font-weight: 600;
+    letter-spacing: 1px; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 5px;
+  }
+
+  /* ─── DEMO SCREEN ─── */
+  .demo-hero {
+    text-align: center;
+    padding: 40px 20px 32px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, #12102a 0%, #0e1a18 100%);
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .demo-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(124,106,247,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .demo-badge {
+    display: inline-block;
+    padding: 4px 14px; border-radius: 100px;
+    border: 1px solid var(--accent-purple);
+    color: var(--accent-purple); font-size: 11px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px;
+  }
+  .demo-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 42px; font-weight: 700; letter-spacing: -1px;
+    background: linear-gradient(135deg, #fff 30%, var(--accent-purple));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; margin-bottom: 6px;
+  }
+  .demo-subtitle {
+    font-size: 16px; color: var(--text-muted); margin-bottom: 6px;
+  }
+  .demo-date { font-size: 12px; color: var(--text-dim); }
+
+  .demo-progress-row {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+    margin-bottom: 24px;
+  }
+  .demo-progress-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 16px;
+    text-align: center;
+  }
+  .dp-icon { font-size: 22px; margin-bottom: 8px; }
+  .dp-num {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 28px; font-weight: 700; margin-bottom: 4px;
+  }
+  .dp-label { font-size: 11px; color: var(--text-muted); line-height: 1.4; margin-bottom: 10px; }
+  .dp-bar-wrap {
+    height: 4px; border-radius: 2px;
+    background: var(--surface2); overflow: hidden;
+  }
+  .dp-bar { height: 100%; border-radius: 2px; background: var(--accent-purple); transition: width 0.4s; }
+
+  .demo-two-col {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  .demo-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .demo-section-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px;
+    color: var(--text-muted); margin-bottom: 14px;
+  }
+  .demo-pipeline-list { display: flex; flex-direction: column; gap: 8px; }
+  .demo-pipe-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: var(--radius-sm);
+    background: var(--surface2);
+  }
+  .demo-pipe-icon { font-size: 14px; flex-shrink: 0; }
+  .demo-pipe-step { font-size: 13px; flex: 1; }
+  .demo-pipe-tag {
+    font-size: 10px; font-weight: 700; padding: 2px 8px;
+    border-radius: 100px; letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  .done-tag { background: #0f2a1a; color: var(--check-on); }
+  .wip-tag { background: #2a2000; color: var(--accent-gold); }
+  .todo-tag { background: var(--tag-bg); color: var(--text-dim); }
+
+  .demo-cast-list { display: flex; flex-direction: column; gap: 10px; }
+  .demo-cast-row { display: flex; align-items: center; gap: 12px; }
+  .demo-cast-emoji { font-size: 22px; width: 36px; text-align: center; flex-shrink: 0; }
+  .demo-cast-name { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; }
+  .demo-cast-role { font-size: 12px; color: var(--text-muted); }
+
+  .demo-dist-list { display: flex; flex-direction: column; gap: 8px; }
+  .demo-dist-row { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+  .demo-dist-icon { font-size: 16px; }
+
+  .demo-note-box {
+    margin-top: 20px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+  }
+  .demo-note-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px;
+  }
+  .demo-note-text {
+    width: 100%; background: transparent; border: none;
+    color: var(--text-primary); font-size: 13px; line-height: 1.6;
+    resize: none; min-height: 80px;
+  }
+  .demo-note-text:focus { outline: none; }
+
+  @media print {
+    header, .pipeline, .phase-tabs, .mini-btn { display: none !important; }
+    .phase-panel { display: block !important; }
+    #phase-1, #phase-2, #phase-3, #phase-4, #phase-notes { display: none !important; }
+    #phase-demo { display: block !important; }
+    body { background: #fff; color: #111; }
+    .demo-hero { background: #f0f0f8 !important; }
+    .demo-title { -webkit-text-fill-color: #111 !important; }
+  }
+
+  /* ─── TOUR ─── */
+  .tour-start-btn {
+    padding: 9px 20px; border-radius: 100px;
+    border: 1px solid var(--accent-gold);
+    background: transparent; color: var(--accent-gold);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.18s; white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .tour-start-btn:hover { background: var(--accent-gold); color: #111; }
+
+  .tour-overlay {
+    display: none; position: fixed; inset: 0; z-index: 500;
+    pointer-events: none;
+  }
+  .tour-overlay.active { display: block; }
+
+  .tour-backdrop {
+    position: fixed; inset: 0; z-index: 500; pointer-events: all;
+  }
+  .tour-backdrop rect { fill: rgba(0,0,0,0.72); }
+
+  .tour-tooltip {
+    position: fixed; z-index: 600;
+    background: var(--surface);
+    border: 1px solid var(--accent-gold);
+    border-radius: 14px;
+    padding: 22px 24px;
+    width: 320px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    pointer-events: all;
+    transition: opacity 0.2s;
+  }
+  .tour-tooltip.hidden { opacity: 0; pointer-events: none; }
+  .tour-step-count {
+    font-size: 10px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--accent-gold); margin-bottom: 8px;
+  }
+  .tour-tooltip h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-tooltip p {
+    font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px;
+  }
+  .tour-tooltip .tip-box {
+    background: var(--surface2); border-radius: 8px;
+    padding: 10px 12px; font-size: 12px; color: var(--text-primary);
+    border-left: 3px solid var(--accent-gold); margin-bottom: 16px; line-height: 1.6;
+  }
+  .tour-nav { display: flex; align-items: center; justify-content: space-between; }
+  .tour-nav-btns { display: flex; gap: 8px; }
+  .tour-btn {
+    padding: 7px 16px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface2);
+    color: var(--text-primary); font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: 'Space Grotesk', sans-serif;
+    transition: all 0.15s;
+  }
+  .tour-btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+  .tour-btn.primary { background: var(--accent-gold); border-color: var(--accent-gold); color: #111; }
+  .tour-btn.primary:hover { opacity: 0.85; }
+  .tour-dots { display: flex; gap: 5px; align-items: center; }
+  .tour-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--border); transition: background 0.2s;
+  }
+  .tour-dot.active { background: var(--accent-gold); width: 18px; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-badge">AP</div>
+  <div style="flex:1;">
+    <h1>Animation Prep — Production Dashboard</h1>
+    <p>Character assets · Scene planning · Animation · Final edit</p>
+  </div>
+  <button class="tour-start-btn" onclick="startTour()">▶ How to use this</button>
+</header>
+
+<!-- PIPELINE -->
+<div class="pipeline">
+  <div class="pipe-step step-1">
+    <div class="step-num">01</div>
+    <h3>Concept + Script</h3>
+    <p>Episode idea → outline → voice script</p>
+    <div class="bar"></div>
+  </div>
+  <div class="pipe-step step-2">
+    <div class="step-num">02</div>
+    <h3>Voice Recording</h3>
+    <p>Home studio → Audacity → export MP3</p>
+    <div class="bar"></div>
+  </div>
+  <div class="pipe-step step-3">
+    <div class="step-num">03</div>
+    <h3>Character Art</h3>
+    <p>Extract · upscale · generate new chars</p>
+    <div class="bar"></div>
+  </div>
+  <div class="pipe-step step-4">
+    <div class="step-num">04</div>
+    <h3>Animation Layer</h3>
+    <p>Animaker · CapCut Ken Burns · lip sync</p>
+    <div class="bar"></div>
+  </div>
+  <div class="pipe-step step-5">
+    <div class="step-num">05</div>
+    <h3>Music + Sound</h3>
+    <p>Suno AI · Pixabay SFX · DaVinci mix</p>
+    <div class="bar"></div>
+  </div>
+  <div class="pipe-step step-6">
+    <div class="step-num">06</div>
+    <h3>Final Edit</h3>
+    <p>DaVinci Resolve · captions · color</p>
+    <div class="bar"></div>
+  </div>
+  <div class="pipe-step step-7">
+    <div class="step-num">07</div>
+    <h3>Publish</h3>
+    <p>YouTube Kids · Instagram · TikTok</p>
+    <div class="bar"></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main>
+  <div class="section-label">Production Phases</div>
+  <div class="phase-tabs">
+    <button class="phase-tab active" data-phase="1">Phase 1 — Characters</button>
+    <button class="phase-tab" data-phase="2">Phase 2 — Scenes</button>
+    <button class="phase-tab" data-phase="3">Phase 3 — Animate</button>
+    <button class="phase-tab" data-phase="4">Phase 4 — Assembly</button>
+    <button class="phase-tab" data-phase="notes">📝 Notes</button>
+    <button class="phase-tab demo-tab" data-phase="demo">🎬 Team Overview</button>
+  </div>
+
+  <!-- ══ PHASE 1 ══ -->
+  <div class="phase-panel active" id="phase-1">
+    <div class="char-grid">
+      <div class="char-list">
+        <div class="char-list-header">Characters</div>
+        <div id="char-list-items">
+          <div class="char-item active" data-char="char1" onclick="selectChar(this, 'char1')">
+            <div class="char-avatar" style="background:#2a1f4a;">🎭</div>
+            <div>
+              <div class="char-item-name">Character 1</div>
+              <div class="char-item-type">Main Host</div>
+            </div>
+          </div>
+          <div class="char-item" data-char="char2" onclick="selectChar(this, 'char2')">
+            <div class="char-avatar" style="background:#1a2e20;">🎭</div>
+            <div>
+              <div class="char-item-name">Character 2</div>
+              <div class="char-item-type">Co-Host</div>
+            </div>
+          </div>
+          <div class="char-item" data-char="char3" onclick="selectChar(this, 'char3')">
+            <div class="char-avatar" style="background:#2a1a2e;">🎭</div>
+            <div>
+              <div class="char-item-name">Character 3</div>
+              <div class="char-item-type">Supporting</div>
+            </div>
+          </div>
+          <div class="char-item" data-char="obj1" onclick="selectChar(this, 'obj1')">
+            <div class="char-avatar" style="background:#1a2a1a;">🌳</div>
+            <div>
+              <div class="char-item-name">Background Object</div>
+              <div class="char-item-type">Object / BG</div>
+            </div>
+          </div>
+          <div class="char-item" data-char="obj2" onclick="selectChar(this, 'obj2')">
+            <div class="char-avatar" style="background:#1a1e2a;">🚗</div>
+            <div>
+              <div class="char-item-name">Prop / Vehicle</div>
+              <div class="char-item-type">Object / Prop</div>
+            </div>
+          </div>
+        </div>
+        <button class="add-char-btn" onclick="addChar()">＋ Add character</button>
+      </div>
+
+      <div class="char-detail-col" id="char-detail">
+        <div class="col-title">Character info</div>
+        <div id="char-detail-content"></div>
+      </div>
+
+      <div class="char-prompt-col" id="char-prompt-col">
+        <div class="col-title">Image Prompt</div>
+        <textarea class="prompt-box" id="char-prompt" rows="5" placeholder="Describe this character for image generation…&#10;e.g. A friendly cartoon fox with orange fur, big eyes, wearing a purple hoodie, kids show style, white background, PNG transparent"></textarea>
+        <div style="display:flex;gap:8px;margin-bottom:14px;">
+          <button class="mini-btn primary" onclick="copyPrompt()">Copy prompt</button>
+          <button class="mini-btn">Open Leonardo.ai</button>
+        </div>
+        <div class="col-title" style="margin-top:4px;">Final Result</div>
+        <div class="result-drop" id="result-drop" onclick="triggerUpload('char-img-upload')">
+          <input type="file" id="char-img-upload" accept="image/*" onchange="previewImage(this,'result-drop')">
+          <div class="result-drop-icon">🖼️</div>
+          <div>Click to upload result</div>
+          <div style="font-size:10px;color:var(--text-dim)">PNG with transparent bg preferred</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PHASE 2 ══ -->
+  <div class="phase-panel" id="phase-2">
+    <div class="scene-cards-grid" id="scene-cards-grid"></div>
+  </div>
+
+  <!-- ══ PHASE 3 ══ -->
+  <div class="phase-panel" id="phase-3">
+    <div class="animate-grid" id="clip-grid"></div>
+  </div>
+
+  <!-- ══ PHASE 4 ══ -->
+  <div class="phase-panel" id="phase-4">
+    <div class="assembly-timeline" id="assembly-timeline"></div>
+  </div>
+
+  <!-- ══ NOTES ══ -->
+  <div class="phase-panel" id="phase-notes">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div>
+        <div class="section-label" style="margin-bottom:4px;">Notes Board</div>
+        <div style="font-size:13px;color:var(--text-muted)">Capture ideas, feedback, reminders — organized by category.</div>
+      </div>
+      <button class="mini-btn primary" onclick="openNoteEditor()">＋ Add note</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;" id="note-filter-bar">
+      <button class="note-filter-btn active" data-cat="all" onclick="filterNotes('all',this)">All</button>
+      <button class="note-filter-btn" data-cat="idea" onclick="filterNotes('idea',this)">💡 Ideas</button>
+      <button class="note-filter-btn" data-cat="feedback" onclick="filterNotes('feedback',this)">💬 Feedback</button>
+      <button class="note-filter-btn" data-cat="todo" onclick="filterNotes('todo',this)">✅ To-Do</button>
+      <button class="note-filter-btn" data-cat="asset" onclick="filterNotes('asset',this)">🖼️ Assets</button>
+      <button class="note-filter-btn" data-cat="music" onclick="filterNotes('music',this)">🎵 Music</button>
+    </div>
+    <div class="notes-grid" id="notes-grid"></div>
+  </div>
+
+  <!-- ══ TEAM OVERVIEW (was Partner Demo) ══ -->
+  <div class="phase-panel" id="phase-demo">
+    <div class="demo-hero">
+      <div class="demo-badge">TEAM OVERVIEW</div>
+      <div class="demo-title">Animation Prep</div>
+      <div class="demo-subtitle">Episode Production Status</div>
+      <div class="demo-date" id="demo-date"></div>
+    </div>
+
+    <div class="demo-progress-row">
+      <div class="demo-progress-card">
+        <div class="dp-icon">🎭</div>
+        <div class="dp-num" id="dp-chars-num">5</div>
+        <div class="dp-label">Characters<br>designed</div>
+        <div class="dp-bar-wrap"><div class="dp-bar" id="dp-chars-bar" style="width:100%"></div></div>
+      </div>
+      <div class="demo-progress-card">
+        <div class="dp-icon">🎬</div>
+        <div class="dp-num">8</div>
+        <div class="dp-label">Scenes<br>planned</div>
+        <div class="dp-bar-wrap"><div class="dp-bar" style="width:80%;background:var(--accent-teal)"></div></div>
+      </div>
+      <div class="demo-progress-card">
+        <div class="dp-icon">✂️</div>
+        <div class="dp-num" id="dp-clips-done">1</div>
+        <div class="dp-label">Clips<br>complete</div>
+        <div class="dp-bar-wrap"><div class="dp-bar" id="dp-clips-bar" style="width:12%;background:var(--accent-gold)"></div></div>
+      </div>
+      <div class="demo-progress-card">
+        <div class="dp-icon">🎵</div>
+        <div class="dp-num">3</div>
+        <div class="dp-label">Music tracks<br>in progress</div>
+        <div class="dp-bar-wrap"><div class="dp-bar" style="width:40%;background:var(--accent-blue)"></div></div>
+      </div>
+      <div class="demo-progress-card">
+        <div class="dp-icon">📅</div>
+        <div class="dp-num">~4</div>
+        <div class="dp-label">Weeks to<br>publish</div>
+        <div class="dp-bar-wrap"><div class="dp-bar" style="width:30%;background:var(--accent-rust)"></div></div>
+      </div>
+    </div>
+
+    <div class="demo-two-col">
+      <div class="demo-section">
+        <div class="demo-section-title">Episode Pipeline</div>
+        <div class="demo-pipeline-list">
+          <div class="demo-pipe-row done"><span class="demo-pipe-icon">✅</span><span class="demo-pipe-step">Concept + Script</span><span class="demo-pipe-tag done-tag">Complete</span></div>
+          <div class="demo-pipe-row done"><span class="demo-pipe-icon">✅</span><span class="demo-pipe-step">Voice Recording</span><span class="demo-pipe-tag done-tag">Complete</span></div>
+          <div class="demo-pipe-row wip"><span class="demo-pipe-icon">🔄</span><span class="demo-pipe-step">Character Art</span><span class="demo-pipe-tag wip-tag">In Progress</span></div>
+          <div class="demo-pipe-row wip"><span class="demo-pipe-icon">🔄</span><span class="demo-pipe-step">Animation Layer</span><span class="demo-pipe-tag wip-tag">In Progress</span></div>
+          <div class="demo-pipe-row todo"><span class="demo-pipe-icon">⏳</span><span class="demo-pipe-step">Music + Sound</span><span class="demo-pipe-tag todo-tag">Upcoming</span></div>
+          <div class="demo-pipe-row todo"><span class="demo-pipe-icon">⏳</span><span class="demo-pipe-step">Final Edit + Captions</span><span class="demo-pipe-tag todo-tag">Upcoming</span></div>
+          <div class="demo-pipe-row todo"><span class="demo-pipe-icon">⏳</span><span class="demo-pipe-step">Publish — YouTube · Instagram · TikTok</span><span class="demo-pipe-tag todo-tag">Upcoming</span></div>
+        </div>
+      </div>
+
+      <div class="demo-section">
+        <div class="demo-section-title">Cast Overview</div>
+        <div class="demo-cast-list" id="demo-cast-list">
+          <div class="demo-cast-row"><span class="demo-cast-emoji">🎭</span><div><div class="demo-cast-name">Character 1</div><div class="demo-cast-role">Main Host</div></div></div>
+          <div class="demo-cast-row"><span class="demo-cast-emoji">🎭</span><div><div class="demo-cast-name">Character 2</div><div class="demo-cast-role">Co-Host</div></div></div>
+          <div class="demo-cast-row"><span class="demo-cast-emoji">🎭</span><div><div class="demo-cast-name">Character 3</div><div class="demo-cast-role">Supporting</div></div></div>
+          <div class="demo-cast-row"><span class="demo-cast-emoji">🌳</span><div><div class="demo-cast-name">Background Object</div><div class="demo-cast-role">Recurring BG element</div></div></div>
+          <div class="demo-cast-row"><span class="demo-cast-emoji">🚗</span><div><div class="demo-cast-name">Prop / Vehicle</div><div class="demo-cast-role">Scene prop</div></div></div>
+        </div>
+
+        <div class="demo-section-title" style="margin-top:20px;">Distribution</div>
+        <div class="demo-dist-list">
+          <div class="demo-dist-row"><span class="demo-dist-icon">▶️</span> YouTube Kids — full episodes</div>
+          <div class="demo-dist-row"><span class="demo-dist-icon">📸</span> Instagram / TikTok — 60-sec clips</div>
+        </div>
+
+        <div class="demo-note-box">
+          <div class="demo-note-label">Team notes / handoff message</div>
+          <textarea class="demo-note-text" id="partner-note-text" placeholder="Add notes for your team — where things stand, what's ready to hand off, next steps…"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:32px;">
+      <button class="mini-btn primary" onclick="printDemo()" style="padding:10px 28px;font-size:14px;">🖨️ Print / Export as PDF</button>
+    </div>
+  </div>
+
+</main>
+
+<!-- SCENE MODAL -->
+<div class="modal-overlay" id="scene-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title" id="modal-title">Scene 1</div>
+    <div class="modal-subtitle" id="modal-subtitle">Upload all artwork for this scene</div>
+    <div class="modal-section-label">Characters in this scene</div>
+    <div class="relation-tags" id="modal-chars"></div>
+    <div class="modal-section-label">Scene images</div>
+    <div class="modal-pics-grid" id="modal-pics-grid"></div>
+    <div class="modal-section-label">Notes</div>
+    <textarea class="prompt-box" style="min-height:70px;" placeholder="Scene notes, timing cues, music mood…"></textarea>
+  </div>
+</div>
+
+<!-- TOUR OVERLAY -->
+<svg class="tour-backdrop" id="tour-backdrop" style="display:none;" xmlns="http://www.w3.org/2000/svg">
+  <defs><mask id="tour-mask"><rect width="100%" height="100%" fill="white"/><rect id="tour-hole" rx="10" fill="black"/></mask></defs>
+  <rect width="100%" height="100%" fill="rgba(0,0,0,0.75)" mask="url(#tour-mask)"/>
+</svg>
+<div class="tour-tooltip hidden" id="tour-tooltip">
+  <div class="tour-step-count" id="tour-step-count">STEP 1 OF 8</div>
+  <h3 id="tour-title">Welcome!</h3>
+  <p id="tour-desc"></p>
+  <div class="tip-box" id="tour-tip" style="display:none;"></div>
+  <div class="tour-nav">
+    <div class="tour-dots" id="tour-dots"></div>
+    <div class="tour-nav-btns">
+      <button class="tour-btn" id="tour-prev" onclick="tourStep(-1)">← Back</button>
+      <button class="tour-btn primary" id="tour-next" onclick="tourStep(1)">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTE EDITOR MODAL -->
+<div class="note-editor-overlay" id="note-editor-overlay">
+  <div class="note-editor">
+    <button class="note-editor-close" onclick="closeNoteEditor()">✕</button>
+    <h3>📝 Add a note</h3>
+    <textarea id="note-input" placeholder="Write your note here…"></textarea>
+    <div class="note-editor-fields">
+      <div>
+        <label>Category</label>
+        <select id="note-cat">
+          <option value="idea">💡 Idea</option>
+          <option value="feedback">💬 Feedback</option>
+          <option value="todo">✅ To-Do</option>
+          <option value="asset">🖼️ Asset</option>
+          <option value="music">🎵 Music</option>
+        </select>
+      </div>
+      <div>
+        <label>Phase</label>
+        <select id="note-phase">
+          <option value="">General</option>
+          <option value="Phase 1">Phase 1 — Characters</option>
+          <option value="Phase 2">Phase 2 — Scenes</option>
+          <option value="Phase 3">Phase 3 — Animate</option>
+          <option value="Phase 4">Phase 4 — Assembly</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="mini-btn" onclick="closeNoteEditor()">Cancel</button>
+      <button class="mini-btn primary" onclick="saveNote()">Save note</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── CHARACTER DATA ───
+const chars = {
+  char1: {
+    name: 'Character 1', emoji: '🎭', role: 'Main Host', type: 'Character',
+    traits: ['Add personality traits here', 'Voice style / tone', 'Visual description', 'Color palette', 'Source / reference'],
+    relations: ['Character 2 (relationship)', 'Character 3 (relationship)'],
+    scenes: [1,2,3,4,5,6,7,8],
+    inScenes: {1:true,2:true,3:false,4:true,5:true,6:false,7:true,8:false},
+    changes: 'No costume changes noted.',
+    prompt: 'Describe your character here for image generation — include style, colors, expression, pose, background',
+    isObject: false
+  },
+  char2: {
+    name: 'Character 2', emoji: '🎭', role: 'Co-Host', type: 'Character',
+    traits: ['Add personality traits here', 'Voice style / tone', 'Visual description', 'Color palette', 'Source / reference'],
+    relations: ['Character 1 (relationship)'],
+    scenes: [1,2,4,5,7,8],
+    inScenes: {1:true,2:true,4:true,5:false,7:true,8:true},
+    changes: 'No changes noted.',
+    prompt: 'Describe your character here for image generation',
+    isObject: false
+  },
+  char3: {
+    name: 'Character 3', emoji: '🎭', role: 'Supporting', type: 'Character',
+    traits: ['Add personality traits here', 'Appears in specific sequences', 'Visual description', 'Voice style', 'Source / reference'],
+    relations: ['Character 1 (relationship)'],
+    scenes: [3,6],
+    inScenes: {3:true,6:true},
+    changes: 'Check any special effects needed.',
+    prompt: 'Describe your character here for image generation',
+    isObject: false
+  },
+  obj1: {
+    name: 'Background Object', emoji: '🌳', role: 'Object / BG', type: 'Object',
+    traits: ['Recurring background element', 'Same asset every episode', 'No movement or expression', 'Visual description', 'Does NOT change'],
+    relations: ['Background of main scenes'],
+    scenes: [2,4,6,8],
+    inScenes: {2:true,4:true,6:true,8:true},
+    changes: 'SAME across all scenes — reuse asset.',
+    prompt: 'Describe your background object for image generation — flat style, transparent background',
+    isObject: true
+  },
+  obj2: {
+    name: 'Prop / Vehicle', emoji: '🚗', role: 'Object / Prop', type: 'Object',
+    traits: ['Scene prop / vehicle', 'No expression', 'Simple cartoon style', 'Visual description', 'Same design every episode'],
+    relations: ['Character 1 (owner/user)'],
+    scenes: [1,5,7],
+    inScenes: {1:true,5:true,7:true},
+    changes: 'SAME — consistent design, no modifications.',
+    prompt: 'Describe your prop for image generation — flat colors, transparent background',
+    isObject: true
+  }
+};
+
+let activeChar = 'char1';
+
+function selectChar(el, key) {
+  document.querySelectorAll('.char-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  activeChar = key;
+  renderCharDetail(key);
+}
+
+function renderCharDetail(key) {
+  const c = chars[key];
+  const isObj = c.isObject;
+  let allScenes = [1,2,3,4,5,6,7,8];
+  let sceneChecks = allScenes.map(s => {
+    const checked = c.inScenes[s] ? 'checked' : '';
+    return `<label class="scene-check">
+      <input type="checkbox" ${checked} onchange="toggleScene('${key}',${s},this)">
+      <span class="scene-check-box">✓</span>
+      <span class="scene-check-label">S${s}</span>
+    </label>`;
+  }).join('');
+
+  document.getElementById('char-detail-content').innerHTML = `
+    <div class="char-name-big">${c.emoji} ${c.name}</div>
+    <span class="char-role-badge">${c.role}</span>
+    <div class="col-title">Traits</div>
+    <div class="trait-list">
+      ${c.traits.map(t => `<div class="trait-item"><span class="trait-bullet"></span>${t}</div>`).join('')}
+    </div>
+    <div class="col-title">Related to</div>
+    <div class="relation-tags">
+      ${c.relations.map(r => `<span class="relation-tag">${r}</span>`).join('')}
+    </div>
+    <div class="col-title">Scenes in episode</div>
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">
+      ${isObj ? '✓ = same asset, no change needed' : '✓ = appears in scene'}
+    </div>
+    <div class="scene-checks">${sceneChecks}</div>
+    <div class="char-changes">
+      <strong>${isObj ? '🔒 Object — reuse same asset?' : '👗 Costume / appearance changes'}</strong>
+      ${c.changes}
+    </div>
+  `;
+  document.getElementById('char-prompt').value = c.prompt;
+}
+
+function toggleScene(key, scene, el) {
+  chars[key].inScenes[scene] = el.checked;
+}
+
+function copyPrompt() {
+  const t = document.getElementById('char-prompt').value;
+  navigator.clipboard.writeText(t).then(() => {
+    const btn = event.target;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy prompt', 1500);
+  });
+}
+
+function triggerUpload(id) { document.getElementById(id).click(); }
+
+function previewImage(input, dropId) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const drop = document.getElementById(dropId);
+    drop.innerHTML = `<input type="file" accept="image/*" onchange="previewImage(this,'${dropId}')"><img src="${e.target.result}" alt="preview">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function addChar() {
+  const name = prompt('Character name:');
+  if (!name) return;
+  const role = prompt('Role (Main Host / Supporting / Object / etc):') || 'Supporting';
+  const key = name.toLowerCase().replace(/\s+/g,'_') + '_' + Date.now();
+  chars[key] = {
+    name, emoji: '🎭', role, type: 'Character',
+    traits: ['Add traits…'],
+    relations: [],
+    scenes: [], inScenes: {},
+    changes: 'No notes yet.',
+    prompt: `Describe ${name} for image generation`,
+    isObject: false
+  };
+  const list = document.getElementById('char-list-items');
+  const item = document.createElement('div');
+  item.className = 'char-item';
+  item.setAttribute('data-char', key);
+  item.setAttribute('onclick', `selectChar(this,'${key}')`);
+  item.innerHTML = `<div class="char-avatar" style="background:#2a2a3a;">🎭</div>
+    <div><div class="char-item-name">${name}</div><div class="char-item-type">${role}</div></div>`;
+  list.appendChild(item);
+  item.click();
+}
+
+renderCharDetail('char1');
+
+// ─── PHASE 2: SCENES ───
+const scenes = [
+  { id:1, title:'Scene 1 — Opening', desc:'Describe what happens in this scene.', chars:['Character 1','Prop / Vehicle'], slots:4 },
+  { id:2, title:'Scene 2 — Introduction', desc:'Describe what happens in this scene.', chars:['Character 1','Character 2','Background Object'], slots:4 },
+  { id:3, title:'Scene 3 — Sequence A', desc:'Describe what happens in this scene.', chars:['Character 1','Character 3'], slots:3 },
+  { id:4, title:'Scene 4 — Adventure', desc:'Describe what happens in this scene.', chars:['Character 1','Character 2','Background Object'], slots:5 },
+  { id:5, title:'Scene 5 — Action', desc:'Describe what happens in this scene.', chars:['Character 1','Prop / Vehicle'], slots:4 },
+  { id:6, title:'Scene 6 — Sequence B', desc:'Describe what happens in this scene.', chars:['Character 3','Background Object'], slots:3 },
+  { id:7, title:'Scene 7 — Climax', desc:'Describe what happens in this scene.', chars:['Character 1','Character 2','Prop / Vehicle'], slots:4 },
+  { id:8, title:'Scene 8 — Wrap-Up', desc:'Describe what happens in this scene.', chars:['Character 1','Character 2'], slots:5 },
+];
+
+const sceneImgs = {};
+
+function buildSceneCards() {
+  const grid = document.getElementById('scene-cards-grid');
+  grid.innerHTML = scenes.map(sc => `
+    <div class="scene-card" onclick="openSceneModal(${sc.id})">
+      <div class="scene-card-header">
+        <span class="scene-num">Scene ${sc.id}</span>
+        <span class="scene-char-count">${sc.chars.length} chars</span>
+      </div>
+      <div class="scene-card-title">${sc.title}</div>
+      <div class="scene-card-desc">${sc.desc}</div>
+      <div class="scene-char-pills">
+        ${sc.chars.map(c=>`<span class="scene-char-pill">${c}</span>`).join('')}
+      </div>
+      <div class="scene-thumb-row">
+        ${Array.from({length:Math.min(sc.slots,3)}).map((_,i)=>`
+          <div class="scene-thumb" id="thumb-s${sc.id}-${i}" onclick="event.stopPropagation();triggerThumbUpload(${sc.id},${i})">
+            <input type="file" accept="image/*" onchange="handleThumb(${sc.id},${i},this)" onclick="event.stopPropagation()">
+            ${(sceneImgs[`${sc.id}-${i}`] ? `<img src="${sceneImgs[`${sc.id}-${i}`]}">` : '📷')}
+          </div>
+        `).join('')}
+        ${sc.slots > 3 ? `<div class="scene-thumb" style="color:var(--text-dim);font-size:12px;font-weight:600;">+${sc.slots-3}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function triggerThumbUpload(sid, idx) {
+  const input = document.querySelector(`#thumb-s${sid}-${idx} input`);
+  if (input) input.click();
+}
+
+function handleThumb(sid, idx, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    sceneImgs[`${sid}-${idx}`] = e.target.result;
+    const thumb = document.getElementById(`thumb-s${sid}-${idx}`);
+    if (thumb) {
+      const existing = thumb.querySelector('img');
+      if (existing) existing.remove();
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      thumb.appendChild(img);
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function openSceneModal(id) {
+  const sc = scenes.find(s => s.id === id);
+  document.getElementById('modal-title').textContent = `Scene ${sc.id} — ${sc.title}`;
+  document.getElementById('modal-subtitle').textContent = sc.desc;
+  document.getElementById('modal-chars').innerHTML = sc.chars.map(c=>`<span class="relation-tag">${c}</span>`).join('');
+  const grid = document.getElementById('modal-pics-grid');
+  grid.innerHTML = Array.from({length: sc.slots}).map((_,i) => {
+    const key = `${id}-${i}`;
+    const img = sceneImgs[key];
+    return `<div class="modal-pic-slot" onclick="triggerModalUpload(${id},${i})">
+      <input type="file" accept="image/*" onchange="handleModalPic(${id},${i},this)" onclick="event.stopPropagation()">
+      ${img ? `<img src="${img}">` : `<div class="pic-icon">🖼️</div><div>Image ${i+1}</div>`}
+    </div>`;
+  }).join('');
+  document.getElementById('scene-modal').classList.add('open');
+}
+
+function triggerModalUpload(sid, idx) {
+  const inputs = document.querySelectorAll('#modal-pics-grid .modal-pic-slot input');
+  if (inputs[idx]) inputs[idx].click();
+}
+
+function handleModalPic(sid, idx, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    sceneImgs[`${sid}-${idx}`] = e.target.result;
+    buildSceneCards();
+    openSceneModal(sid);
+  };
+  reader.readAsDataURL(file);
+}
+
+function closeModal() { document.getElementById('scene-modal').classList.remove('open'); }
+document.getElementById('scene-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+// ─── PHASE 3: CLIPS ───
+const clips = [
+  { id:1, scene:1, title:'Opening Clip', desc:'Opening sequence animation.', status:'todo' },
+  { id:2, scene:2, title:'Intro Clip', desc:'Characters meet / introduction.', status:'todo' },
+  { id:3, scene:3, title:'Sequence A Clip', desc:'First major sequence.', status:'todo' },
+  { id:4, scene:4, title:'Adventure Clip', desc:'Main action beat.', status:'todo' },
+  { id:5, scene:5, title:'Action Clip', desc:'Fast-paced action sequence.', status:'todo' },
+  { id:6, scene:6, title:'Sequence B Clip', desc:'Secondary sequence.', status:'todo' },
+  { id:7, scene:7, title:'Climax Clip', desc:'Climax / resolution.', status:'todo' },
+  { id:8, scene:8, title:'Closing Clip', desc:'Wrap-up and closing.', status:'todo' },
+];
+
+const statusLabel = { todo:'To do', wip:'In progress', done:'Done' };
+
+function buildClipGrid() {
+  document.getElementById('clip-grid').innerHTML = clips.map(cl => `
+    <div class="clip-card">
+      <div class="clip-preview">
+        🎬
+        <span class="clip-duration">0:05</span>
+        <span class="clip-status ${cl.status}">${statusLabel[cl.status]}</span>
+      </div>
+      <div class="clip-body">
+        <div class="clip-title">S${cl.scene}: ${cl.title}</div>
+        <div class="clip-desc">${cl.desc}</div>
+        <div class="clip-actions">
+          <button class="mini-btn" onclick="cycleStatus(${cl.id})">Status</button>
+          <button class="mini-btn primary">Edit clip</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function cycleStatus(id) {
+  const order = ['todo','wip','done'];
+  const clip = clips.find(c=>c.id===id);
+  clip.status = order[(order.indexOf(clip.status)+1)%order.length];
+  buildClipGrid();
+}
+
+// ─── PHASE 4: ASSEMBLY ───
+const assemblySteps = [
+  { label:'Clip order', desc:'Arrange all clips in correct scene order in your editing timeline.', tools:'DaVinci Resolve', pct:0 },
+  { label:'Music mix', desc:'Sync music tracks to animation timing. Fade between scenes.', tools:'DaVinci / CapCut', pct:0 },
+  { label:'SFX layer', desc:'Add sound effects at key action moments.', tools:'DaVinci', pct:0 },
+  { label:'Color grade', desc:'Apply consistent color pass across all clips.', tools:'DaVinci Resolve', pct:0 },
+  { label:'Titles + Lower 3rds', desc:'Add episode title card and character name callouts.', tools:'DaVinci / CapCut', pct:0 },
+  { label:'Auto-Captions', desc:'Generate captions via CapCut or Veed.io. Accessibility + engagement.', tools:'CapCut / Veed.io', pct:0 },
+  { label:'Final review', desc:'Watch full episode. Check audio levels, timing, caption accuracy.', tools:'All', pct:0 },
+  { label:'Export', desc:'Export master 1080p MP4. Create 60-sec clip for short-form platforms.', tools:'DaVinci Resolve', pct:0 },
+  { label:'Upload', desc:'Post to YouTube + Instagram/TikTok. Schedule or go live.', tools:'YouTube Studio', pct:0 },
+];
+
+const stepStatuses = assemblySteps.map(() => 'todo');
+
+function buildAssembly() {
+  document.getElementById('assembly-timeline').innerHTML = assemblySteps.map((s, i) => `
+    <div class="timeline-row" onclick="cycleAssemblyStatus(${i})">
+      <div>
+        <div class="timeline-label">${String(i+1).padStart(2,'0')} — ${s.label}</div>
+        <div class="timeline-progress"><div class="timeline-progress-fill" style="width:${s.pct}%"></div></div>
+      </div>
+      <div class="timeline-desc">${s.desc}</div>
+      <div class="timeline-tools">
+        <div class="assemble-status">
+          <span class="status-dot ${stepStatuses[i]}"></span>
+          <span style="font-size:11px;color:var(--text-muted)">${statusLabel[stepStatuses[i]]}</span>
+        </div>
+        <div style="margin-top:4px;font-size:11px;color:var(--text-dim)">${s.tools}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function cycleAssemblyStatus(i) {
+  const order = ['todo','wip','done'];
+  stepStatuses[i] = order[(order.indexOf(stepStatuses[i])+1)%order.length];
+  assemblySteps[i].pct = stepStatuses[i]==='done' ? 100 : stepStatuses[i]==='wip' ? 50 : 0;
+  buildAssembly();
+}
+
+// ─── TABS ───
+document.querySelectorAll('.phase-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.phase-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.phase-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(`phase-${tab.dataset.phase}`).classList.add('active');
+  });
+});
+
+// ─── NOTES ───
+let notes = [
+  { id:1, text:'Add your first idea or note here — or delete this one and start fresh.', cat:'idea', phase:'', ts: Date.now() },
+];
+let noteIdCounter = 2;
+let activeFilter = 'all';
+
+const catColors = { idea:'cat-idea', feedback:'cat-feedback', todo:'cat-todo', asset:'cat-asset', music:'cat-music' };
+const catLabels = { idea:'💡 Idea', feedback:'💬 Feedback', todo:'✅ To-Do', asset:'🖼️ Asset', music:'🎵 Music' };
+
+function renderNotes() {
+  const filtered = activeFilter === 'all' ? notes : notes.filter(n => n.cat === activeFilter);
+  const grid = document.getElementById('notes-grid');
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--text-dim);font-size:14px;">No notes yet in this category. Hit <strong style="color:var(--text-muted)">＋ Add note</strong> to start.</div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(n => {
+    const ago = timeSince(n.ts);
+    return `<div class="note-card">
+      <div class="note-card-top">
+        <span class="note-cat-pill ${catColors[n.cat]}">${catLabels[n.cat]}</span>
+        <button class="note-delete" onclick="deleteNote(${n.id})" title="Delete">✕</button>
+      </div>
+      <div class="note-text">${escHtml(n.text)}</div>
+      <div class="note-meta">${ago}${n.phase ? `<span class="note-phase-tag">${n.phase}</span>` : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+function timeSince(ts) {
+  const s = Math.floor((Date.now()-ts)/1000);
+  if (s < 60) return 'Just now';
+  if (s < 3600) return `${Math.floor(s/60)}m ago`;
+  if (s < 86400) return `${Math.floor(s/3600)}h ago`;
+  return `${Math.floor(s/86400)}d ago`;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function filterNotes(cat, btn) {
+  activeFilter = cat;
+  document.querySelectorAll('.note-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderNotes();
+}
+
+function openNoteEditor() {
+  document.getElementById('note-input').value = '';
+  document.getElementById('note-cat').value = 'idea';
+  document.getElementById('note-phase').value = '';
+  document.getElementById('note-editor-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('note-input').focus(), 100);
+}
+
+function closeNoteEditor() { document.getElementById('note-editor-overlay').classList.remove('open'); }
+
+function saveNote() {
+  const text = document.getElementById('note-input').value.trim();
+  if (!text) return;
+  notes.unshift({ id: noteIdCounter++, text, cat: document.getElementById('note-cat').value, phase: document.getElementById('note-phase').value, ts: Date.now() });
+  closeNoteEditor();
+  activeFilter = 'all';
+  document.querySelectorAll('.note-filter-btn').forEach(b => b.classList.toggle('active', b.dataset.cat==='all'));
+  renderNotes();
+}
+
+function deleteNote(id) { notes = notes.filter(n => n.id !== id); renderNotes(); }
+document.getElementById('note-editor-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeNoteEditor(); });
+
+// ─── TEAM OVERVIEW ───
+document.getElementById('demo-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+function printDemo() {
+  document.querySelectorAll('.phase-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.phase-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector('[data-phase="demo"]').classList.add('active');
+  document.getElementById('phase-demo').classList.add('active');
+  setTimeout(() => window.print(), 200);
+}
+
+// ─── TOUR ───
+const tourSteps = [
+  {
+    title: '👋 Welcome to Animation Prep!',
+    desc: 'This is your production dashboard — track everything from character art to final publish. Let\'s walk through each section so your whole team knows how to use it.',
+    tip: '💡 You can restart this tour anytime by clicking "▶ How to use this" in the top right.',
+    target: 'header', phase: null
+  },
+  {
+    title: '🗺️ The Production Pipeline',
+    desc: 'This bar shows all 7 steps to finish an episode — Script → Voice → Art → Animate → Music → Edit → Publish. Always visible so no team loses track of where things stand.',
+    tip: '📋 Each colored bar corresponds to a phase. Steps go left to right.',
+    target: '.pipeline', phase: null
+  },
+  {
+    title: '🎭 Phase 1 — Character Tracker',
+    desc: 'Click any character to see their full profile: traits, relationships, which scenes they appear in, and their image generation prompt. Add new characters with the + button.',
+    tip: '✅ Use scene checkboxes to track appearances. For objects/props, a checkmark means "reuse same asset — no new art needed."',
+    target: '.char-grid', phase: '1'
+  },
+  {
+    title: '🖼️ Character Prompts + Results',
+    desc: 'Each character has a ready-to-copy AI image prompt. Hit Copy, paste into Leonardo.ai or Bing Image Creator, then upload the result right here to keep everything in one place.',
+    tip: '📋 PNG with transparent background works best for animation later.',
+    target: '.char-prompt-col', phase: '1'
+  },
+  {
+    title: '🎬 Phase 2 — Scene Cards',
+    desc: 'Each card is one scene. Click to open and upload artwork for that scene. Thumbnails show what\'s been delivered so you can see asset progress at a glance.',
+    tip: '📸 Character team uploads finished PNGs here → Animation team pulls from here. This is your handoff point.',
+    target: '#scene-cards-grid', phase: '2'
+  },
+  {
+    title: '✂️ Phase 3 — Animate',
+    desc: 'One card per clip. Click "Status" to cycle To Do → In Progress → Done. Track animation work clip by clip across your whole episode.',
+    tip: '🎞️ Work in 5-second chunks, then piece together in Phase 4.',
+    target: '#clip-grid', phase: '3'
+  },
+  {
+    title: '🔧 Phase 4 — Assembly',
+    desc: 'The final checklist — from ordering clips to uploading. Click any row to mark it In Progress or Done. The bar fills as you complete steps.',
+    tip: '🎯 Go in order: clip sequence → music → SFX → color → captions → export → upload.',
+    target: '#assembly-timeline', phase: '4'
+  },
+  {
+    title: '📝 Notes — Capture Everything',
+    desc: 'Drop in ideas, team feedback, to-do reminders, asset notes, or music prompts. Filter by category to find things fast.',
+    tip: '💬 Great for logging what a team member needs before the next handoff.',
+    target: '#phase-notes', phase: 'notes'
+  },
+  {
+    title: '🎬 Team Overview',
+    desc: 'The clean status view for sharing with any team or instructor. Shows pipeline progress, cast overview, and a handoff message box. Hit Print/Export to share as a PDF.',
+    tip: '✨ You\'re all set! Bookmark this and come back every session.',
+    target: '#phase-demo', phase: 'demo', isLast: true
+  }
+];
+
+let tourIndex = 0;
+
+function startTour() { tourIndex = 0; document.getElementById('tour-backdrop').style.display = 'block'; renderTourStep(); }
+function endTour() { document.getElementById('tour-backdrop').style.display = 'none'; document.getElementById('tour-tooltip').classList.add('hidden'); }
+function tourStep(dir) { tourIndex = Math.max(0, Math.min(tourSteps.length - 1, tourIndex + dir)); renderTourStep(); }
+
+function renderTourStep() {
+  const step = tourSteps[tourIndex];
+  if (step.phase !== null) {
+    document.querySelectorAll('.phase-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.phase-panel').forEach(p => p.classList.remove('active'));
+    if (step.phase) {
+      const tab = document.querySelector(`[data-phase="${step.phase}"]`);
+      const panel = document.getElementById(`phase-${step.phase}`);
+      if (tab) tab.classList.add('active');
+      if (panel) panel.classList.add('active');
+    }
+  }
+  let targetEl = step.target ? document.querySelector(step.target) : null;
+  const hole = document.getElementById('tour-hole');
+  if (targetEl) {
+    const rect = targetEl.getBoundingClientRect();
+    const pad = 8;
+    hole.setAttribute('x', rect.left - pad);
+    hole.setAttribute('y', rect.top - pad + window.scrollY);
+    hole.setAttribute('width', rect.width + pad * 2);
+    hole.setAttribute('height', rect.height + pad * 2);
+    hole.setAttribute('rx', 12);
+    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } else {
+    hole.setAttribute('x', -9999); hole.setAttribute('y', -9999);
+    hole.setAttribute('width', 0); hole.setAttribute('height', 0);
+  }
+  const tooltip = document.getElementById('tour-tooltip');
+  tooltip.classList.remove('hidden');
+  setTimeout(() => {
+    if (targetEl) {
+      const rect = targetEl.getBoundingClientRect();
+      const tw = 320, th = tooltip.offsetHeight || 240;
+      const vw = window.innerWidth, vh = window.innerHeight;
+      let top, left;
+      if (rect.bottom + th + 20 < vh) { top = rect.bottom + 16; left = Math.min(Math.max(rect.left, 12), vw - tw - 12); }
+      else if (rect.top - th - 20 > 0) { top = rect.top - th - 16; left = Math.min(Math.max(rect.left, 12), vw - tw - 12); }
+      else if (rect.right + tw + 20 < vw) { top = Math.min(Math.max(rect.top, 12), vh - th - 12); left = rect.right + 16; }
+      else { top = Math.min(Math.max(rect.top, 12), vh - th - 12); left = rect.left - tw - 16; }
+      tooltip.style.top = top + 'px'; tooltip.style.left = left + 'px'; tooltip.style.transform = 'none';
+    } else {
+      tooltip.style.top = '50%'; tooltip.style.left = '50%'; tooltip.style.transform = 'translate(-50%,-50%)';
+    }
+  }, 120);
+  document.getElementById('tour-step-count').textContent = `STEP ${tourIndex + 1} OF ${tourSteps.length}`;
+  document.getElementById('tour-title').textContent = step.title;
+  document.getElementById('tour-desc').textContent = step.desc;
+  const tipEl = document.getElementById('tour-tip');
+  if (step.tip) { tipEl.textContent = step.tip; tipEl.style.display = 'block'; } else { tipEl.style.display = 'none'; }
+  document.getElementById('tour-dots').innerHTML = tourSteps.map((_,i) => `<div class="tour-dot ${i===tourIndex?'active':''}"></div>`).join('');
+  document.getElementById('tour-prev').style.display = tourIndex === 0 ? 'none' : 'inline-block';
+  const nextBtn = document.getElementById('tour-next');
+  if (step.isLast) { nextBtn.textContent = '✓ Got it!'; nextBtn.onclick = endTour; }
+  else { nextBtn.textContent = 'Next →'; nextBtn.onclick = () => tourStep(1); }
+}
+
+document.getElementById('tour-backdrop').addEventListener('click', endTour);
+
+buildSceneCards();
+buildClipGrid();
+buildAssembly();
+renderNotes();
+</script>
+</body>
+</html>
